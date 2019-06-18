@@ -120,7 +120,7 @@
       new Round({id: '#box', x: ev.clientX, y: ev.clientY, color: color, r: 60});
     };
 
-    // 删除节点后根据ballArr创建和更新节点
+    // 删除节点后ballArr创建和更新节点
     setInterval(function () {
       for (var i = 0; i < box.children.length; i++) {
         box.removeChild(box.children[i]);
