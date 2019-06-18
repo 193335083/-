@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="box"></div>
+	</body>
+</html>
+<style type="text/css">
+	#box{
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+		background: #000;
+	}
+	body{
+		overflow: hidden;
+	}
+	*{
+		padding: 0;
+		margin: 0;
+	}
+</style>
+<script type="text/javascript">
+	// 存储dom
+	var ballArr = [];
+  var box = document.getElementById('box');
+
+  // js生成指定随机数公式 0~1 * (最大数 - 最小数) + 最小数
+	function GetRandomNumber(m, n) {
+		return Math.round(Math.random() * (n - m) + m);
+  }
+
+  // 生成随机颜色
+	function GetRandomBackground() {
+    var colorOne = GetRandomNumber(0, 255);
+    var colorTwo = GetRandomNumber(0, 255);
+    var colorThree = GetRandomNumber(0, 255);
+    var opacity = GetRandomNumber(0, 10) / 10;
+		return 'rgba(' + colorOne + ',' + colorTwo + ',' + colorThree + ',' + opacity + ')';
+  }
+
+  // 删除数组中的某一个对象
+	// ie11不支持Promise和async,所以采用回调
+  function removeArr(_arr, _obj, callback) {
+    var _length = _arr.length;
+		for (var i = 0; i < _length; i++) {
+			if (_arr[i] === _obj) {
+				if (i === 0) {
+					_arr.shift(); //删除并返回数组的第一个元素
+				} else if (i === length - 1) {
+					_arr.pop();  //删除并返回数组的最后一个元素
+				} else {
+					_arr.splice(i, 1); //删除下标为i的元素
+				}
+				callback(_arr)
+			}
+		}
+  }
+
+  function Round(jsonData) {
+		this._init(jsonData);
+	}
+	
+	Round.prototype = {
+		constructor: Round,
+		// 初始化数据
+		_init: function(jsonData) {
+      var Json = jsonData || {};
+			this.id = Json.id;
+			this.x = Json.x;
+			this.y = Json.y;
+			this.r = Json.r;
+			this.color = Json.color;
+			ballArr.push(this);
+
+			// 动画移动速度
+			this.dx = GetRandomNumber(-10, 10);
+			this.dy = GetRandomNumber(-10, 10);
+			// 动画消失速度
+			this.dr = GetRandomNumber(1, 5);
+    },
+		// 创建
+		create: function () {
+      var oDiv = document.querySelector(this.id);
+      var div = document.createElement('div');
+      div.style.position = 'absolute';
+      div.style.left = this.x + 'px';
+      div.style.top = this.y + 'px';
+      div.style.borderRadius = '50%';
+      div.style.background = this.color;
+      div.style.width = this.r + 'px';
+      div.style.height = this.r + 'px';
+      oDiv.appendChild(div);
+    },
+		// 更新
+		update: function () {
+		  var _x = this.x + this.dx;
+		  var _y = this.y + this.dy;
+      this.x = _x;
+			this.y = _y;
+			this.r -= this.dr;
+      if (this.r < 0) {
+			  this.r = 0;
+        removeArr(ballArr, this, function(arr) {
+          ballArr = arr;
+        });
+			}
+    }
+	};
+
+	// DOM加载完毕执行
+  document.addEventListener('DOMContentLoaded', function () {
+    // 鼠标滑动后添加到ballArr
+    box.onmousemove = function (e) {
+      var ev = e || window.event;
+      var color = GetRandomBackground();
+      new Round({id: '#box', x: ev.clientX, y: ev.clientY, color: color, r: 60});
+    };
+
+    // 删除节点后根据ballArr创建和更新节点
+    setInterval(function () {
+      for (var i = 0; i < box.children.length; i++) {
+        box.removeChild(box.children[i]);
+      }
+      for(var j = 0; j < ballArr.length; j++) {
+        ballArr[j].create();
+        ballArr[j].update();
+      }
+    },50);
+  });
+
+
+</script>
